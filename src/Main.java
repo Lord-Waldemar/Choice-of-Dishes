@@ -2,6 +2,7 @@ import java.util.Scanner;
 
 public class Main {
 
+
     public static void main(String[] args) {
 
         System.out.println("Приветствую! Какие игридиенты вы хотите использовать для готовки? Перечислите через пробел цифры \n1-лук, 2-морковка, 3-рис, 4-мясо, 5-курица, 6-гречка, 7-макароны");
