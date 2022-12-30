@@ -1,12 +1,17 @@
+import db.JDBCPostgres;
+
 import java.util.Scanner;
 import java.util.ArrayList;
+
 public class Main {
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
         while (true) {
-            System.out.println("Приветствую! Какие игридиенты вы хотите использовать для готовки? Перечислите номераингридиентов через пробел\n1-лук, 2-морковка, 3-рис, 4-мясо, 5-курица, 6-гречка, 7-макароны");
-            Scanner sc = new Scanner(System.in);
-            String str = sc.nextLine();
-            String[] s = str.split(" ");
+            System.out.println("Приветствую! Какие иNгридиенты вы хотите использовать для готовки? Перечислите номераингридиентов через пробел\n1-лук, 2-морковка, 3-рис, 4-мясо, 5-курица, 6-гречка, 7-макароны");
+            String[] s = sc.nextLine().split(" ");
+
+            JDBCPostgres JDBC = new JDBCPostgres();
+
             int[] ing = new int[s.length];
             for (int j = 0; j < s.length; j++) {
                 ing[j] = Integer.parseInt(s[j]);
@@ -15,8 +20,7 @@ public class Main {
 
             if (isPlovMatched(ing)) dishOutput.add("Плов");
             if (isSupMatched(ing)) dishOutput.add("Суп");
-            String separator = ", ";
-            String stringDishOutput = String.join(separator, dishOutput);
+            String stringDishOutput = String.join(", ", dishOutput);
             if (dishOutput.isEmpty()) {
                 System.out.println("К сожалению вы ничего не можете приготовить :(\nХотите попробовать снова?");
                 String answer = sc.nextLine();
@@ -34,7 +38,6 @@ public class Main {
                     break;
                 }
             }
-
         }
     }
 
