@@ -1,68 +1,61 @@
 import db.JDBCPostgres;
-
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        System.out.println("Доброго времени суток!");
         while (true) {
-            System.out.println("Приветствую! Какие иNгридиенты вы хотите использовать для готовки? Перечислите номераингридиентов через пробел\n1-лук, 2-морковка, 3-рис, 4-мясо, 5-курица, 6-гречка, 7-макароны");
-            String[] s = sc.nextLine().split(" ");
-
-            JDBCPostgres JDBC = new JDBCPostgres();
-
-            int[] ing = new int[s.length];
-            for (int j = 0; j < s.length; j++) {
-                ing[j] = Integer.parseInt(s[j]);
+            ArrayList ingredients = JDBCPostgres.select("SELECT * FROM ingredients ORDER BY number");
+            System.out.println("Какие ингридиенты вы хотите использовать для готовки? Перечислите номера ингридиентов через пробел.");
+            for (int i = 0; i < ingredients.size(); i++) {
+                System.out.print((i + 1) + "-" + ingredients.get(i) + " ");
             }
-            ArrayList<String> dishOutput = new ArrayList<>();
+            System.out.println();
 
-            if (isPlovMatched(ing)) dishOutput.add("Плов");
-            if (isSupMatched(ing)) dishOutput.add("Суп");
-            String stringDishOutput = String.join(", ", dishOutput);
-            if (dishOutput.isEmpty()) {
-                System.out.println("К сожалению вы ничего не можете приготовить :(\nХотите попробовать снова?");
-                String answer = sc.nextLine();
-                if (answer.equals("нет")) break;
-            }
-            else {
-                System.out.println("Вы можете приготовить: " + stringDishOutput + "\nХотите выбрать 1 случайное блюдо?");
-                String answer = sc.nextLine();
-                if (answer.equals("да")) {
-                    System.out.println(dishOutput.get(0+(int) (Math.random() * dishOutput.size())));
-                    break;
+            try {
+                String[] s = sc.nextLine().split(" ");
+                int[] ing = new int[s.length];
+                for (int j = 0; j < s.length; j++) {
+                    ing[j] = Integer.parseInt(s[j]);
                 }
-                if (answer.equals("нет")) {
-                    System.out.println("Тогда продублирую список: " + stringDishOutput);
-                    break;
-                }
-            }
-        }
-    }
+                ArrayList dishes = JDBCPostgres.select("select * from (\n" +
+                        "select array_agg(i.number) as ing, dishes.name  from dishes\n" +
+                        "                                     join ingredients_dishes id on dishes.id = id.dishes_id\n" +
+                        "                                     join ingredients i on i.number = id.ingredients_id\n" +
+                        "group by dishes.name) as de\n" +
+                        "where ing <@ ARRAY" + Arrays.toString(ing));
 
-    public static boolean isPlovMatched(int[] ings) {
-        int plovCount = 0;
-        int[] plov = new int[] {1, 2, 3, 4};
-        for (int i = 0; i < ings.length; i++) {
-            int thisIng = ings[i];
-            for (int j = 0; j < plov.length; j++) {
-                if (thisIng==plov[j]) plovCount++;
+                if (dishes.isEmpty()) {
+                    System.out.println("К сожалению вы ничего не можете приготовить :(\nХотите попробовать снова?");
+                    String answer = sc.nextLine();
+                    if (answer.equals("нет") | answer.equals("Нет") | answer.equals("-")) break;
+                } else {
+                    System.out.println("Из данных ингредиентов вы можете приготовить: ");
+                    for (int i = 0; i < dishes.size(); i++) {
+                        System.out.println(dishes.get(i));
+                    }
+                    if (dishes.size() == 1) break;
+                    else {
+                        System.out.println("Хотите выбрать 1 случайное блюдо?");
+                        String answer = sc.nextLine();
+                        if (answer.equals("да") | answer.equals("Да") | answer.equals("+")) {
+                            System.out.println("Ваше блюдо - " + dishes.get(0 + (int) (Math.random() * dishes.size())) + "!");
+                            break;
+                        }
+                        else if (answer.equals("нет")) {
+                            System.out.println("Тогда удачной готовки :)");
+                            break;
+                        }
+                        else System.out.println("Я вас не понимаю, до свидания)");
+                        break;
+                    }
+                }
+            }catch (NumberFormatException e) {
+                System.out.println("Вы вводите не цифры! Повторите ввод.");
             }
         }
-        if (plovCount==plov.length) return true;
-        else return false;
-    }
-    public static boolean isSupMatched(int[] ings) {
-        int supCount = 0;
-        int[] sup = new int[] {1,2,5,6,7};
-        for (int i = 0; i < ings.length; i++) {
-            int thisIng = ings[i];
-            for (int j = 0; j < sup.length; j++) {
-                if (thisIng==sup[j]) supCount++;
-            }
-        }
-        if (supCount==sup.length) return true;
-        else return false;
     }
 }
