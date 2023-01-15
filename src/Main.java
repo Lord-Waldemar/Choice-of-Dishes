@@ -1,15 +1,18 @@
 import db.JDBCPostgres;
+import JSOUP.*;
+
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.ArrayList;
-
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Р”РѕР±СЂРѕРіРѕ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє!");
+        System.out.println("Доброго времени суток!");
         while (true) {
             ArrayList ingredients = JDBCPostgres.select("SELECT * FROM ingredients ORDER BY number");
-            System.out.println("РљР°РєРёРµ РёРЅРіСЂРёРґРёРµРЅС‚С‹ РІС‹ С…РѕС‚РёС‚Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РґР»СЏ РіРѕС‚РѕРІРєРё? РџРµСЂРµС‡РёСЃР»РёС‚Рµ РЅРѕРјРµСЂР° РёРЅРіСЂРёРґРёРµРЅС‚РѕРІ С‡РµСЂРµР· РїСЂРѕР±РµР».");
+            System.out.println("Какие ингридиенты вы хотите использовать для готовки? Перечислите номера ингридиентов через пробел.");
             for (int i = 0; i < ingredients.size(); i++) {
                 System.out.print((i + 1) + "-" + ingredients.get(i) + " ");
                 if (i!=0 & i%9==0) System.out.println();
@@ -17,7 +20,7 @@ public class Main {
             System.out.println();
 
             try {
-                String[] s = sc.nextLine().split(" ");
+                String[] s = sc.nextLine().trim().split(" ");
                 int[] ing = new int[s.length];
                 for (int j = 0; j < s.length; j++) {
                     ing[j] = Integer.parseInt(s[j]);
@@ -30,32 +33,38 @@ public class Main {
                         "where ing <@ ARRAY" + Arrays.toString(ing));
 
                 if (dishes.isEmpty()) {
-                    System.out.println("Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ РІС‹ РЅРёС‡РµРіРѕ РЅРµ РјРѕР¶РµС‚Рµ РїСЂРёРіРѕС‚РѕРІРёС‚СЊ :(\nРҐРѕС‚РёС‚Рµ РїРѕРїСЂРѕР±РѕРІР°С‚СЊ СЃРЅРѕРІР°?");
+                    System.out.println("К сожалению вы ничего не можете приготовить :(\nХотите попробовать снова?");
                     String answer = sc.nextLine();
-                    if (answer.equals("РЅРµС‚") | answer.equals("РќРµС‚") | answer.equals("-")) break;
+                    if (answer.equals("нет") | answer.equals("Нет") | answer.equals("-")) break;
                 } else {
-                    System.out.println("РР· РґР°РЅРЅС‹С… РёРЅРіСЂРµРґРёРµРЅС‚РѕРІ РІС‹ РјРѕР¶РµС‚Рµ РїСЂРёРіРѕС‚РѕРІРёС‚СЊ: ");
+                    System.out.println("Из данных ингредиентов вы можете приготовить: ");
                     for (int i = 0; i < dishes.size(); i++) {
                         System.out.println(dishes.get(i));
                     }
                     if (dishes.size() == 1) break;
                     else {
-                        System.out.println("РҐРѕС‚РёС‚Рµ РІС‹Р±СЂР°С‚СЊ 1 СЃР»СѓС‡Р°Р№РЅРѕРµ Р±Р»СЋРґРѕ?");
+                        System.out.println("Хотите выбрать 1 случайное блюдо?");
                         String answer = sc.nextLine();
-                        if (answer.equals("РґР°") | answer.equals("Р”Р°") | answer.equals("+")) {
-                            System.out.println("Р’Р°С€Рµ Р±Р»СЋРґРѕ - " + dishes.get((int) (Math.random() * dishes.size())) + "!");
+                        if (answer.equals("да") | answer.equals("Да") | answer.equals("+")) {
+                            String randomDish = dishes.get((int) (Math.random() * dishes.size())).toString();
+                            System.out.println("Ваше блюдо - " + randomDish + "!");
+                            String urlDish = randomDish.replace(' ', '+');
+                            JsoupCustom.getURL(urlDish);
+
                             break;
                         }
-                        else if (answer.equals("РЅРµС‚")) {
-                            System.out.println("РўРѕРіРґР° СѓРґР°С‡РЅРѕР№ РіРѕС‚РѕРІРєРё :)");
+                        else if (answer.equals("нет")) {
+                            System.out.println("Тогда удачной готовки ?");
                             break;
                         }
-                        else System.out.println("РЇ РІР°СЃ РЅРµ РїРѕРЅРёРјР°СЋ, РґРѕ СЃРІРёРґР°РЅРёСЏ)");
+                        else System.out.println("Я вас не понимаю, до свидания)");
                         break;
                     }
                 }
-            }catch (NumberFormatException e) {
-                System.out.println("Р’С‹ РІРІРѕРґРёС‚Рµ РЅРµ С†РёС„СЂС‹! РџРѕРІС‚РѕСЂРёС‚Рµ РІРІРѕРґ.");
+            } catch (NumberFormatException e) {
+                System.out.println("Вы вводите не цифры! Повторите ввод.");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

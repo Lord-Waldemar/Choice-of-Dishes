@@ -5,10 +5,9 @@ import java.util.ArrayList;
 public class JDBCPostgres {
 
     //  Database credentials
-    static final String DB_URL = "jdbc:postgresql://localhost:5432/main";
-    static final String USER = "postgres";
-    static final String PASS = "root";
-
+    static final String DB_URL = "jdbc:postgresql://snuffleupagus.db.elephantsql.com/jhgqkbdr";
+    static final String USER = "jhgqkbdr";
+    static final String PASS = "Jj6JyQ6QOKeBSE_5uUhBa0AQFhNt0xPT";
     public static void main(String[] argv) {
 
         System.out.println("Testing connection to PostgreSQL JDBC");
@@ -44,6 +43,7 @@ public class JDBCPostgres {
             while (rs.next()) {
                 out.add(rs.getString(2));
                 }
+            connection.close();
             return out;
             }
             catch (SQLException e) {
